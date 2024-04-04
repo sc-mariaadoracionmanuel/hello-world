@@ -1,0 +1,2115 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Sitecore CDP Guest REST API",
+    "description": "Use the Guest REST API to create, retrieve, update, and delete guest data in Sitecore CDP.\n\nThis REST API lets you interact with:\n   - The guest object. The guest object is the core entity of Sitecore CDP. It stores the personal data of a customer, and all relevant transactional and behavioral data is linked in a guest profile.\n   - The guest data extension object. A guest data extension is an object that lets you specify any key-value pairs you want. Guest data extensions are optional and enable your organization to capture more robust information about your guests.\n\nAfter capturing guest information, Sitecore CDP users can:\n   - View the captured data in the [guest profile](https://doc.sitecore.com/cdp/en/users/sitecore-cdp/view-a-guest-profile-in-sitecore-cdp.html).\n   - Use the captured data to [build segments of guests](https://doc.sitecore.com/cdp/en/users/sitecore-cdp/introduction-to-batch-segmentation.html).\n   - [Export audience data](https://doc.sitecore.com/cdp/en/users/sitecore-cdp/audience-export.html) to activate audiences outside Sitecore CDP.\n\nNote the following:\n   - To use this REST API, you must [authenticate](https://doc.sitecore.com/cdp/en/developers/api/authentication-and-authorization.html) your API requests.\n   - All API requests are made in your production environment.\n   - This reference documentation describes Sitecore CDP functionality for data model 2.1.\n\n For more information, see the [official Sitecore CDP developer documentation](https://doc.sitecore.com/cdp/en/developers/api/index-en.html).\n",
+    "contact": {
+      "name": "Sitecore Corporation A/S"
+    },
+    "version": "v2.1"
+  },
+  "servers": [
+    {
+      "url": "https://api-engage-eu.sitecorecloud.io",
+      "description": "Production server EU",
+      "variables": {}
+    },
+    {
+      "url": "https://api-engage-ap.sitecorecloud.io",
+      "description": "Production server AP",
+      "variables": {}
+    },
+    {
+      "url": "https://api-engage-us.sitecorecloud.io",
+      "description": "Production server US",
+      "variables": {}
+    }
+  ],
+  "tags": [
+    {
+      "name": "Guest",
+      "description": "The guest object is the core entity of Sitecore CDP. It stores the personal data of a customer, and all relevant transactional and behavioral data is linked in a guest profile.\n\n To get started with this API, create a guest then find it in Sitecore CDP."
+    },
+    {
+      "name": "Guest data extension",
+      "description": "A guest data extension is an object that lets you specify any key-value pairs you want. Guest data extensions are optional and enable your organization to capture more robust information about your guests.\n\n To get started with this API, create a data extension for the guest you previously created, then find the data in Sitecore CDP in the guest profile."
+    }
+  ],
+  "paths": {
+    "/v2.1/guests/{guestRef}/extensions": {
+      "post": {
+        "tags": [
+          "Guest data extension"
+        ],
+        "summary": "Create a data extension",
+        "description": "Creates a data extension for a guest. You can create up to six data extensions.\n\nTo avoid creating key-value pairs in a data extension that already exist within a guest profile, first retrieve a guest's collection of data extensions to check that the keys you intend to create are unique.\n\n### Creating the request body\nIn the request body, you must provide one object. This object represents the data extension. Note the following about the object:\n- Can contain primitive values only. You cannot nest objects. If you need to group key-value pairs, use prefixes for the key names.\n- Can contain a maximum of 100 key-value pairs.\n- Must contain the `name` key. This is the name of the data extension.\n  - If you send extension data from one source, set the value for `name` to `ext`.\n  - If you send extension data from multiple sources, you can create up to six data extensions by setting the value for `name` to one of the following: `ext`, `ext1`, `ext2`, `ext3`, `ext4`, `ext5`.\n- The other key-value pairs you include in the object become the extension data. For example, if you include `\"loyaltyTier\": \"level2\"` in the object, **Loyalty Tier** with the value of `level2` becomes extension data.\n#### Naming keys\nThe keys you enter in the request body must be:\n- Alphanumeric [A-Z,a-z,0-9] as per the [JSON RFC 7159](https://www.rfc-editor.org/rfc/rfc7159) specification.\n - In camel case.\n- Unique across all data extensions within a guest profile. For example, if `ext` contains the `vipMember` key, you must not use that key in any other data extensions for the same guest.\n\n### Example request body\nHere's an example request body:\n\n```\n{\n\"name\": \"ext\",\n\"vipMember\": true,\n\"loyaltyTier\": \"level2\",\n\"rewardBalance\": 5012.25,\n\"loyaltyNumber\": 3452\n}\n```\nThis creates four key-value pairs in the `ext` data extension for the guest.\n\n### Multiple sources\n You can send extension data from multiple sources. For example, your organization might want to send extension data both from a loyalty system to capture loyalty data, and from a Customer Relationship Management (CRM) system to capture email preferences, alternative mailing addresses, and so on.\n\n To send data from multiple sources, we recommend that you use a different data extension name for each source system. For example, use the `ext` data extension for the loyalty system data, and use the `ext1` data extension for the CRM data.\n",
+        "operationId": "CreateGuestDataExtension",
+        "parameters": [
+          {
+            "name": "guestRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The guest reference. This is a unique identifier of the guest record. If you don't know the guest reference, first retrieve guests.",
+              "example": "f7aabbca-1c1b-4fc2-be72-3e16294a4f03"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestDataExtensionCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestDataExtensionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestDataExtensionBadRequestResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestDataExtensionConflictResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Guest data extension"
+        ],
+        "summary": "Retrieve a guest's collection of data extensions",
+        "description": "Retrieves the URLs for each of the guest's data extensions.\n\nWe recommend that you retrieve the URLs using the `expand=true` query parameter to check that the keys you intend to create when you Create a data extension are unique. This is because keys must be unique across all data extensions within a guest profile.\n\nIn the response, each URL in `items.href` corresponds to one data extension. Use this URL to interact with the guest's data extension, for example, to retrieve or update it.",
+        "operationId": "RetrieveGuestDataExtensions",
+        "parameters": [
+          {
+            "name": "guestRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The guest reference. This is a unique identifier of the guest record. If you don't know the guest reference, first retrieve guests.",
+              "example": "f7aabbca-1c1b-4fc2-be72-3e16294a4f03"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Limit"
+            }
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Expand"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrieveDataGuestExtensionsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Guest data extension not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestDataExtensionNotFoundResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2.1/guests/{guestRef}/extensions/{dataExtensionName}": {
+      "get": {
+        "tags": [
+          "Guest data extension"
+        ],
+        "summary": "Retrieve a data extension",
+        "description": "Retrieves a data extension for a guest.",
+        "operationId": "retrieveGuestDataExtension",
+        "parameters": [
+          {
+            "name": "guestRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The guest reference. This is a unique identifier of the guest record. If you don't know the guest reference, first retrieve guests.",
+              "example": "f7aabbca-1c1b-4fc2-be72-3e16294a4f03"
+            }
+          },
+          {
+            "name": "dataExtensionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The name of the data extension. If you don't know this value, first retrieve the guest's collection of data extensions.",
+              "example": "ext1",
+              "enum": [
+                "ext",
+                "ext1",
+                "ext2",
+                "ext3",
+                "ext4",
+                "ext5"
+              ]
+            }
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "properties": {
+                "empty": {
+                  "type": "boolean"
+                }
+              },
+              "description": "You can expand items in a collection by setting `expand=true`. This eliminates the need to send multiple follow-up requests (one for the collection and another for each of its items). This also helps you check if the data you intend to create already exists.\n",
+              "example": true,
+              "items": {
+                "type": "string",
+                "description": "You can expand items in a collection by setting `expand=true`. This eliminates the need to send multiple follow-up requests (one for the collection and another for each of its items). This also helps you check if the data you intend to create already exists.\n",
+                "example": "true",
+                "default": ""
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestDataExtensionResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Guest data extension not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestNotFoundResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Guest data extension"
+        ],
+        "summary": "Update a data extension",
+        "description": "Fully updates a data extension for a guest, replacing the entire resource including all the key-value pairs with the data you send in the request.\n\nTo update certain key-value pairs only, use the Partially update a data extension endpoint instead.",
+        "operationId": "PutGuestDataExtension",
+        "parameters": [
+          {
+            "name": "guestRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The guest reference. This is a unique identifier of the guest record. If you don't know the guest reference, first retrieve guests.",
+              "example": "f7aabbca-1c1b-4fc2-be72-3e16294a4f03"
+            }
+          },
+          {
+            "name": "dataExtensionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The name of the data extension. If you don't know this value, first retrieve the guest's collection of data extensions.",
+              "example": "ext1",
+              "enum": [
+                "ext",
+                "ext1",
+                "ext2",
+                "ext3",
+                "ext4",
+                "ext5"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestDataExtensionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestDataExtensionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestDataExtensionUpdateBadRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Guest data extension"
+        ],
+        "summary": "Partially update a data extension",
+        "description": "Partially updates a data extension for a guest, replacing only those key-value pairs in the resource that you provide in the request.\n\nIf multiple source systems use the same data extension, use this endpoint to safely update the key-value pairs from a specific source system without accidentally overwriting the key-value pairs from other source systems.",
+        "operationId": "UpdateGuestDataExtension",
+        "parameters": [
+          {
+            "name": "guestRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The guest reference. This is a unique identifier of the guest record. If you don't know the guest reference, first retrieve guests.",
+              "example": "f7aabbca-1c1b-4fc2-be72-3e16294a4f03"
+            }
+          },
+          {
+            "name": "dataExtensionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The name of the data extension. If you don't know this value, first retrieve the guest's collection of data extensions.",
+              "example": "ext1",
+              "enum": [
+                "ext",
+                "ext1",
+                "ext2",
+                "ext3",
+                "ext4",
+                "ext5"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestDataExtensionPatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestDataExtensionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestDataExtensionUpdateBadRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Guest data extension"
+        ],
+        "summary": "Delete a data extension",
+        "description": "Deletes the data extension for a guest, including all the key-value pairs in the data extension.\n\nTo delete certain key-value pairs only, use the Delete key-value pairs from a data extension endpoint instead.",
+        "operationId": "DeleteGuestDataExtension",
+        "parameters": [
+          {
+            "name": "guestRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The guest reference. This is a unique identifier of the guest record. If you don't know the guest reference, first retrieve guests.",
+              "example": "f7aabbca-1c1b-4fc2-be72-3e16294a4f03"
+            }
+          },
+          {
+            "name": "dataExtensionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The name of the data extension. If you don't know this value, first retrieve the guest's collection of data extensions.",
+              "example": "ext1",
+              "enum": [
+                "ext",
+                "ext1",
+                "ext2",
+                "ext3",
+                "ext4",
+                "ext5"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Guest data extension not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestNotFoundResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2.1/guests/{guestRef}/extensions/{dataExtensionName}/fields": {
+      "delete": {
+        "tags": [
+          "Guest data extension"
+        ],
+        "summary": "Delete key-value pairs from a data extension",
+        "description": "Deletes the key-value pairs you provide in the `name` query parameter from a data extension for a guest.\n\nFor example, if your data extension contains the `vipMember` and `loyaltyMember` keys, you can delete both keys and their values by making the following request:\n\n\n\n`{baseURL}/v2.1/guests/{guestRef}/extensions/{dataExtensionName}/fields?name=vipMember|loyaltyMember`\n\nIf you don't provide the query parameter, this operation will empty the data extension: the data extension itself will not be deleted, but all the key-value pairs in it will.",
+        "operationId": "deleteGuestDataExtensionFields",
+        "parameters": [
+          {
+            "name": "guestRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The guest reference. This is a unique identifier of the guest record. If you don't know the guest reference, first retrieve guests.",
+              "example": "f7aabbca-1c1b-4fc2-be72-3e16294a4f03"
+            }
+          },
+          {
+            "name": "dataExtensionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The name of the data extension. If you don't know this value, first retrieve the guest's collection of data extensions.",
+              "example": "ext1",
+              "enum": [
+                "ext",
+                "ext1",
+                "ext2",
+                "ext3",
+                "ext4",
+                "ext5"
+              ]
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "properties": {
+                "empty": {
+                  "type": "boolean"
+                }
+              },
+              "description": "The fields in the data extension object that you want to delete.",
+              "example": "vipMember|loyaltyTier",
+              "items": {
+                "type": "string",
+                "description": "The fields in the data extension object that you want to delete.",
+                "example": "vipMember|loyaltyTier",
+                "default": ""
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestDataExtensionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2.1/guests": {
+      "post": {
+        "tags": [
+          "Guest"
+        ],
+        "summary": "Create a guest",
+        "description": "Creates a guest.\nThe REST API does not check whether a guest already exists in Sitecore CDP when you create a guest. To avoid creating duplicates, first retrieve guests by their email address or other identifying information.\n\nIn the response, the `ref` key contains the guest reference.\n\n## Find the guest in Sitecore CDP\nYou can also use the guest reference to find data about the guest in Sitecore CDP. In Sitecore CDP, click **Guests**. In the **Search** field, enter the guest reference, then click the **Guest type: All** filter. Then, Sitecore CDP lists the guest profile for the guest.",
+        "operationId": "CreateGuest",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Resource successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestCreateRequest"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestBadRequestResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Guest"
+        ],
+        "summary": "Retrieve guests",
+        "description": "Retrieves guests. We recommend that you retrieve guests by their email address or other identifying information using query parameters before you create a guest. This lets you check if a certain guest already exists in Sitecore CDP. If the guest exists, avoid creating duplicates. Instead, update the existing guest.\n### Query parameters\n\nYou can use the following query parameters to retrieve guests by some identifying information:\n- `email`\n- `email.untouched`\n- `firstName`\n- `lastName`\n- `phoneNumber`\n- `identifiers.provider` plus `identifiers.id`\n\nAlternatively, you can use the `expand=true` query parameter to retrieve guests with all their key-value pairs listed.\n\n#### Examples\nHere's an example of how to use the `email` query parameter to retrieve guests by their email address:\n\n`{baseURL}/v2.1/guests?email=john.doe@gmail.com\"`\n\nHere's an example of how to use the `identifiers.provider` and the `identifiers.id` query parameters to retrieve guests by their identifiers:\n\n`{baseURL}/v2.1/guests?identifiers.provider=ProfileSystem&identifiers.id=B7524AE6-CF1C-440F-B1A2-0C9D42F5CB41\"`\n\nIf any of this returns a guest, avoid creating another guest with the same identifying information. Instead, update the existing guest.\n\n### Guest reference\nIn the response, in `items.href`, the guest reference is the string that follows the final slash:\n\n`\"href\": \"{baseURL}/v2.1/guests/{guestRef}\"\n`\n\nExample guest reference: `f7aabbca-1c1b-4fc2-be72-3e16294a4f03`\n\nUse the guest reference to interact with the full guest record, for example, to retrieve or update it.\n\nYou can also use the guest reference to find data about the guest in Sitecore CDP. In Sitecore CDP, click **Guests**. In the **Search** field, enter the guest reference, then click the **Guest type: All** filter. Then, Sitecore CDP lists the guest profile for the guest.",
+        "operationId": "RetrieveGuests",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Limit"
+            }
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Expand"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "You can sort search results by specifying a sort query parameter and a corresponding sort value (`ASC` or `DESC` case sensitive) on a collection resource URL.\n\nThe example query parameter shows how to return a resource in ascending chronological order of when the resource was created and descending order of the resource label.\n",
+              "example": "createdAt::ASC|label::DESC'"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrieveGuestsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2.1/guests/{guestRef}": {
+      "get": {
+        "tags": [
+          "Guest"
+        ],
+        "summary": "Retrieve a guest",
+        "description": "Retrieves the full guest record of a guest, including any guest data extensions.",
+        "operationId": "RetrieveGuest",
+        "parameters": [
+          {
+            "name": "guestRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The guest reference. This is a unique identifier of the guest record. If you don't know the guest reference, first retrieve guests.",
+              "example": "f7aabbca-1c1b-4fc2-be72-3e16294a4f03"
+            }
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "properties": {
+                "empty": {
+                  "type": "boolean"
+                }
+              },
+              "description": "You can expand items in a collection by setting `expand=true`. This eliminates the need to send multiple follow-up requests (one for the collection and another for each of its items). This also helps you check if the data you intend to create already exists.\n",
+              "example": true,
+              "items": {
+                "type": "string",
+                "description": "You can expand items in a collection by setting `expand=true`. This eliminates the need to send multiple follow-up requests (one for the collection and another for each of its items). This also helps you check if the data you intend to create already exists.\n",
+                "example": "true",
+                "default": ""
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestCreateRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestNotFoundResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Guest"
+        ],
+        "summary": "Update a guest",
+        "description": "Fully updates a guest, replacing the entire resource including all the key-value pairs with the data you send in the request.\n\nTo update certain key-value pairs only, use the Partially update a guest endpoint instead.",
+        "operationId": "PutGuest",
+        "parameters": [
+          {
+            "name": "guestRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The guest reference. This is a unique identifier of the guest record. If you don't know the guest reference, first retrieve guests.",
+              "example": "f7aabbca-1c1b-4fc2-be72-3e16294a4f03"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestCreateRequest"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestBadRequestResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Guest"
+        ],
+        "summary": "Partially update a guest",
+        "description": "Partially updates a guest, replacing only those fields in the resource that you provide in the request.\n\n For example, you can use this request to update the guest's array of phone numbers when they enter a new one.",
+        "operationId": "UpdateGuests",
+        "parameters": [
+          {
+            "name": "guestRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The guest reference. This is a unique identifier of the guest record. If you don't know the guest reference, first retrieve guests.",
+              "example": "f7aabbca-1c1b-4fc2-be72-3e16294a4f03"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestPartialUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestCreateRequest"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestBadRequestResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Guest"
+        ],
+        "summary": "Delete a guest",
+        "description": "Deletes a guest record and all entities associated with the guest including orders, sessions, and events. **This is an irreversible operation. After you delete a guest record, you cannot retrieve the guest record or any related entities.**",
+        "operationId": "DeleteGuest",
+        "parameters": [
+          {
+            "name": "guestRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The guest reference. This is a unique identifier of the guest record. If you don't know the guest reference, first retrieve guests.",
+              "example": "f7aabbca-1c1b-4fc2-be72-3e16294a4f03"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "401": {
+            "description": "Unauthorized request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestNotFoundResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GuestDataExtensionResponse": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "description": "The URL of the guest extension.\n",
+            "example": "https://api-engage-eu.sitecorecloud.io/v2.1/guests/f7aabbca-1c1b-4fc2-be72-3e16294a4f03/ext1"
+          },
+          "ref": {
+            "type": "string",
+            "description": "Guest extension reference.\n",
+            "example": "6a5cb3c2-1a4a-56d8-8a01-1ede232b9db2"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the data extension. You can only use a name once in a collection.",
+            "example": "ext"
+          },
+          "key": {
+            "type": "string",
+            "description": "You must set this to `default`.",
+            "example": "default"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "The date and time when the resource was created in Sitecore CDP.",
+            "format": "date-time",
+            "example": "2024-01-01T16:17:16.000Z"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "description": "The date and time when the resource was last updated in Sitecore CDP.",
+            "format": "date-time",
+            "example": "2024-01-01T16:17:16.000Z"
+          },
+          "{exampleKey1}": {
+            "type": "string",
+            "description": "A key-value pair in the data extension.\n Example: `\"vipMember\": true`",
+            "example": "{exampleValue1}"
+          },
+          "{exampleKey2}": {
+            "type": "string",
+            "description": "A key-value pair in the data extension.\n Example: `\"loyaltyTier\": \"level2\"`",
+            "example": "{exampleValue2}"
+          },
+          "guest": {
+            "$ref": "#/components/schemas/GuestHref"
+          }
+        }
+      },
+      "GuestHref": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "description": "The URL of the guest.",
+            "example": "https://api-engage-eu.sitecorecloud.io/v2.1/guests/f7aabbca-1c1b-4fc2-be72-3e16294a4f03"
+          }
+        }
+      },
+      "GuestDataExtensionBadRequestResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "The HTTP request status.",
+            "format": "int32",
+            "example": 400
+          },
+          "code": {
+            "type": "integer",
+            "description": "The HTTP response status code.",
+            "format": "int32",
+            "example": 400
+          },
+          "message": {
+            "type": "string",
+            "description": "Error description.",
+            "example": "name: value must be one of ext,ext1,ext2,ext3,ext4,ext5"
+          },
+          "developerMessage": {
+            "type": "string",
+            "description": "Error description for developers.",
+            "example": "Attribute name is invalid (value must be one of ext,ext1,ext2,ext3,ext4,ext5)."
+          },
+          "moreInfoUrl": {
+            "type": "string",
+            "description": "URL to get more information about the error.",
+            "example": "https://support.sitecore.com"
+          }
+        }
+      },
+      "GuestDataExtensionConflictResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "The HTTP request status.",
+            "format": "int32",
+            "example": 409
+          },
+          "code": {
+            "type": "integer",
+            "description": "The HTTP response status code.",
+            "format": "int32",
+            "example": 409
+          },
+          "message": {
+            "type": "string",
+            "description": "Error description.",
+            "example": "Data extension ext1 already exists."
+          },
+          "developerMessage": {
+            "type": "string",
+            "description": "Error description for developers.",
+            "example": "409 (Conflict): Data extension ext1 already exists."
+          },
+          "moreInfoUrl": {
+            "type": "string",
+            "description": "URL to get more information about the error.",
+            "example": "https://support.sitecore.com"
+          }
+        }
+      },
+      "GuestDataExtensionCreateRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the data extension.",
+            "example": "ext1",
+            "enum": [
+              "ext",
+              "ext1",
+              "ext2",
+              "ext3",
+              "ext4",
+              "ext5"
+            ]
+          },
+          "{exampleKey1}": {
+            "type": "string",
+            "description": "A key-value pair of your choice.\n Example: `\"vipMember\": true`",
+            "example": "{exampleValue1}"
+          },
+          "{exampleKey2}": {
+            "type": "string",
+            "description": "A key-value pair of your choice.\n Example: `\"loyaltyTier\": \"level2\"`",
+            "example": "{exampleValue2}"
+          }
+        }
+      },
+      "GuestNotFoundResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "The HTTP request status.",
+            "format": "int32",
+            "example": 404
+          },
+          "code": {
+            "type": "integer",
+            "description": "The HTTP response status code.",
+            "format": "int32",
+            "example": 404
+          },
+          "message": {
+            "type": "string",
+            "description": "Error description.",
+            "example": "The specified resource does not exist."
+          },
+          "developerMessage": {
+            "type": "string",
+            "description": "Error description for developers.",
+            "example": "Guest with ref f7aabbca-1c1b-4fc2-be72-3e16294a4f03a for client key {...} was not found"
+          },
+          "moreInfoUrl": {
+            "type": "string",
+            "description": "URL to get more information about the error.",
+            "example": "https://support.sitecore.com"
+          }
+        }
+      },
+      "Fields": {
+        "type": "array",
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          }
+        },
+        "description": "The fields in the data extension object that you want to delete.",
+        "example": "vipMember|loyaltyTier",
+        "items": {
+          "type": "string",
+          "description": "The fields in the data extension object that you want to delete.",
+          "example": "vipMember|loyaltyTier",
+          "default": ""
+        }
+      },
+      "GuestDataExtensionUpdateBadRequestResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "The HTTP request status.",
+            "format": "int32",
+            "example": 400
+          },
+          "code": {
+            "type": "integer",
+            "description": "The HTTP response status code.",
+            "format": "int32",
+            "example": 400
+          },
+          "message": {
+            "type": "string",
+            "description": "Error description.",
+            "example": "Unable to parse JSON string"
+          },
+          "developerMessage": {
+            "type": "string",
+            "description": "Error description for developers.",
+            "example": "JSON parse error [line: 7, column: 6]."
+          },
+          "moreInfoUrl": {
+            "type": "string",
+            "description": "URL to get more information about the error.",
+            "example": "https://support.sitecore.com"
+          }
+        }
+      },
+      "GuestDataExtensionRequest": {
+        "type": "object",
+        "properties": {
+          "{exampleKey1}": {
+            "type": "string",
+            "description": "A key-value pair of your choice.\n Example: `\"vipMember\": true`",
+            "example": "{exampleValue1}"
+          },
+          "{exampleKey2}": {
+            "type": "string",
+            "description": "A key-value pair of your choice.\n Example: `\"loyaltyTier\": \"level2\"`",
+            "example": "{exampleValue2}"
+          }
+        }
+      },
+      "Expand": {
+        "type": "array",
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          }
+        },
+        "description": "You can expand items in a collection by setting `expand=true`. This eliminates the need to send multiple follow-up requests (one for the collection and another for each of its items). This also helps you check if the data you intend to create already exists.\n",
+        "example": true,
+        "items": {
+          "type": "string",
+          "description": "You can expand items in a collection by setting `expand=true`. This eliminates the need to send multiple follow-up requests (one for the collection and another for each of its items). This also helps you check if the data you intend to create already exists.\n",
+          "example": "true",
+          "default": ""
+        }
+      },
+      "Link": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string"
+          }
+        }
+      },
+      "RetrieveDataGuestExtensionsResponse": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "description": "Request's offset.",
+            "format": "int32",
+            "example": 0
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Request's limit.",
+            "format": "int32",
+            "example": 10
+          },
+          "href": {
+            "type": "string",
+            "description": "Request's URL.",
+            "example": "https://api-engage-eu.sitecorecloud.io/v2.1/guests/f7aabbca-1c1b-4fc2-be72-3e16294a4f03/extensions?offset=0&limit=10"
+          },
+          "items": {
+            "type": "array",
+            "description": "List of guests for the current request.",
+            "example": [
+              {
+                "href": "https://api-engage-eu.sitecorecloud.io/v2.1/guests/c6cf690f-8384-4734-ab2d-6caa53b6308c/extensions/ext"
+              },
+              {
+                "href": "https://api-engage-eu.sitecorecloud.io/v2.1/guests/1c5e13e7-8b97-4f12-9ab5-d30a6fa13d1aextensions/ext1"
+              }
+            ],
+            "items": {
+              "$ref": "#/components/schemas/Link"
+            }
+          }
+        }
+      },
+      "GuestDataExtensionNotFoundResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "The HTTP request status.",
+            "format": "int32",
+            "example": 404
+          },
+          "code": {
+            "type": "integer",
+            "description": "The HTTP response status code.",
+            "format": "int32",
+            "example": 404
+          },
+          "message": {
+            "type": "string",
+            "description": "Error description.",
+            "example": "The specified resource does not exist."
+          },
+          "developerMessage": {
+            "type": "string",
+            "description": "Error description for developers.",
+            "example": "Data extension ext2 for Guest ref ea9b4612-3488-47d9-beea-17404876f5d6 and client key {...} was not found for v2.1"
+          },
+          "moreInfoUrl": {
+            "type": "string",
+            "description": "URL to get more information about the error.",
+            "example": "https://support.sitecore.com"
+          }
+        }
+      },
+      "CollectionResourceLink": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "offset": {
+            "type": "object"
+          },
+          "nextOffset": {
+            "type": "object"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "prev": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "next": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "last": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Link"
+            }
+          }
+        }
+      },
+      "Offset": {
+        "type": "object",
+        "description": "Collection responses use offset pagination. The offset query parameter is used to exclude from a response the first N items of the entire resource collection.",
+        "example": 10,
+        "default": 0
+      },
+      "Limit": {
+        "maximum": 100,
+        "minimum": 10,
+        "type": "object",
+        "description": "Collection responses use offset pagination. This query parameter lets you adjust the maximum number of collection items to return for a single request.\n",
+        "example": 40,
+        "default": 10
+      },
+      "GuestDataExtensionPatchRequest": {
+        "type": "object",
+        "properties": {
+          "{exampleKey1}": {
+            "type": "string",
+            "description": "A key-value pair of your choice.\nExample: `\"vipMember\": true``",
+            "example": "{exampleValue1}"
+          }
+        }
+      },
+      "GuestCreateRequest": {
+        "required": [
+          "guestType"
+        ],
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "description": "The URL of the guest.\n",
+            "example": "https://api-engage-eu.sitecorecloud.io/v2.1/guests/f7aabbca-1c1b-4fc2-be72-3e16294a4f03"
+          },
+          "ref": {
+            "type": "string",
+            "description": "Guest's reference.\n",
+            "example": "f7aabbca-1c1b-4fc2-be72-3e16294a4f03"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "The date and time when the resource was created in Sitecore CDP.\n",
+            "format": "date-time",
+            "example": "2024-01-01T16:17:16.000Z"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "description": "The date and time when the resource was updated in Sitecore CDP.\n",
+            "format": "date-time",
+            "example": "2024-01-01T16:17:16.000Z"
+          },
+          "firstSeen": {
+            "type": "string",
+            "description": "The first seen date for the guest.\n",
+            "format": "date-time",
+            "example": "2024-01-01T16:17:16.000Z"
+          },
+          "lastSeen": {
+            "type": "string",
+            "description": "The last time the guest interacted with your brand. If the guest is currently online and is interacting with your brand, this returns the date and timestamp of when the current session started.\n",
+            "format": "date-time",
+            "example": "2024-01-01T16:17:16.000Z"
+          },
+          "guestType": {
+            "type": "string",
+            "description": "The level of identity obtained. The `\"traveller\"` value is only applicable to certain industries.",
+            "format": "lowercase",
+            "example": "visitor",
+            "enum": [
+              "visitor",
+              "customer",
+              "traveller"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the guest.\n\nExample values: \"Br\", \"Brigadier\", \"Capt\", \"Colonel\", \"Dame\", \"Dr\", \"Elder\", \"Fr\", \"General\", \"Hon\", \"Judge\", \"Lord\", \"Master\", \"Miss\", \"Mr\", \"Mrs\", \"Ms\", \"Mstr\", \"Prof\", \"Rabbi\", \"Rev\", \"Shaikha\", \"Sheikh\", \"Sir\", \"Sister\", \"Sr\"\n",
+            "format": "title case",
+            "example": "Mr"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "The guest's first name.",
+            "format": "title case",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "The guest's last name.",
+            "format": "title case recommended",
+            "example": "Doe"
+          },
+          "gender": {
+            "type": "string",
+            "description": "The guest's gender.\n\nExample values: \"male\", \"female\", \"other\"\n",
+            "format": "lowercase",
+            "example": "male"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "description": "The guest's date of birth. Validation: Date must be in the past.\n",
+            "format": "date-time",
+            "example": "1991-01-01T16:17:16.000Z"
+          },
+          "nationality": {
+            "type": "string",
+            "description": "The guest's nationality.\n\nExample values: \"Irish\", \"British\", \"Spanish\", \"French\"\n",
+            "format": "title case",
+            "example": "Irish"
+          },
+          "passportNumber": {
+            "type": "string",
+            "description": "The passport number of the guest.\n",
+            "format": "uppercase",
+            "example": "PZ4A9565"
+          },
+          "passportExpiry": {
+            "type": "string",
+            "description": "The expiry date of the guest's passport.\n",
+            "format": "date-time",
+            "example": "2025-01-01T00:00:00.000Z"
+          },
+          "emails": {
+            "type": "array",
+            "description": "All the email addresses of the guest.\n",
+            "example": [
+              "john.doe@gmail.com"
+            ],
+            "items": {
+              "type": "string",
+              "description": "All the email addresses of the guest.\n",
+              "example": [
+                "john.doe@gmail.com"
+              ]
+            }
+          },
+          "email": {
+            "type": "string",
+            "description": "The email address of the guest.\n",
+            "example": "john.doe@gmail.com"
+          },
+          "identifiers": {
+            "type": "array",
+            "description": "A list of identifiers for the guest.\n",
+            "items": {
+              "$ref": "#/components/schemas/Identifier"
+            }
+          },
+          "phoneNumbers": {
+            "type": "array",
+            "description": "The phone numbers of the guest.\n",
+            "example": [
+              "+353161123345",
+              "+353161123346"
+            ],
+            "items": {
+              "type": "string",
+              "description": "The phone numbers of the guest.\n",
+              "example": [
+                "+353161123345",
+                "+353161123346"
+              ]
+            }
+          },
+          "street": {
+            "type": "array",
+            "description": "The street address of the guest.\n",
+            "format": "title case strings",
+            "example": [
+              "Ashford House",
+              "Tara Street",
+              "Dublin 2"
+            ],
+            "items": {
+              "type": "string",
+              "description": "The street address of the guest.\n",
+              "format": "title case strings",
+              "example": [
+                "Ashford House",
+                "Tara Street",
+                "Dublin 2"
+              ]
+            }
+          },
+          "city": {
+            "type": "string",
+            "description": "The guest's city.\n\nExample values: \"Dublin\", \"London\", \"Madrid\", \"Paris\"\n",
+            "format": "title case",
+            "example": "Dublin"
+          },
+          "country": {
+            "type": "string",
+            "description": "The guest's country.\n\nExample values: \"IE\", \"GB\", \"ES\", \"FR\"",
+            "format": "2-letter ISO 3166-1 Alpha-2 country code",
+            "example": "IE"
+          },
+          "postCode": {
+            "type": "string",
+            "description": "The guest's zipcode.\n",
+            "format": "uppercase",
+            "example": "D2"
+          },
+          "state": {
+            "type": "string",
+            "description": "The state (address) of the guest.\n",
+            "format": "title case",
+            "example": "Oregon"
+          }
+        }
+      },
+      "Identifier": {
+        "required": [
+          "id",
+          "provider"
+        ],
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "The identifier provider.",
+            "example": "ProfileSystem"
+          },
+          "id": {
+            "type": "string",
+            "description": "The identifier ID.",
+            "example": "B7524AE6-CF1C-440F-B1A2-0C9D42F5CB41"
+          },
+          "expiryDate": {
+            "type": "string",
+            "description": "The expiry date of the identifier.",
+            "format": "date-time",
+            "example": "2025-01-01T16:17:16.000Z"
+          }
+        },
+        "description": "A list of identifiers for the guest."
+      },
+      "GuestBadRequestResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "The HTTP request status.",
+            "format": "int32",
+            "example": 400
+          },
+          "code": {
+            "type": "integer",
+            "description": "The HTTP response status code.",
+            "format": "int32",
+            "example": 400
+          },
+          "message": {
+            "type": "string",
+            "description": "Error description.",
+            "example": "guestType: not a valid value"
+          },
+          "developerMessage": {
+            "type": "string",
+            "description": "Error description for developers.",
+            "example": "Attribute guestType is invalid (not a valid value)."
+          },
+          "moreInfoUrl": {
+            "type": "string",
+            "description": "URL to get more information about the error.",
+            "example": "https://support.sitecore.com"
+          }
+        }
+      },
+      "UnauthorizedResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "The HTTP request status.",
+            "format": "uppercase",
+            "example": "UNAUTHORIZED"
+          },
+          "code": {
+            "type": "integer",
+            "description": "The HTTP response status code.",
+            "format": "int32",
+            "example": 401
+          },
+          "message": {
+            "type": "string",
+            "description": "Error description.",
+            "example": "Authentication credentials are required to access the resource. All requests must be authenticated."
+          },
+          "moreInfoUrl": {
+            "type": "string",
+            "description": "URL to get more information about the error.",
+            "example": "https://support.sitecore.com"
+          }
+        }
+      },
+      "First": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "example": "https://api-engage-eu.sitecorecloud.io/v2.1/guests?offset=0&limit=10"
+          }
+        },
+        "description": "Request's first list of guests URL."
+      },
+      "Next": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "example": "https://api-engage-eu.sitecorecloud.io/v2.1/guests?offset=0&limit=10"
+          }
+        },
+        "description": "Request's next list of guests URL."
+      },
+      "RetrieveGuestsResponse": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "description": "Request's offset.",
+            "format": "int32",
+            "example": 0
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Request's limit.",
+            "format": "int32",
+            "example": 10
+          },
+          "First": {
+            "$ref": "#/components/schemas/First"
+          },
+          "Next": {
+            "$ref": "#/components/schemas/Next"
+          },
+          "href": {
+            "type": "string",
+            "description": "Request's URL.",
+            "example": "https://api-engage-eu.sitecorecloud.io/v2.1/guests?offset=0&limit=10"
+          },
+          "items": {
+            "type": "array",
+            "description": "List of guests for the current request.",
+            "example": [
+              {
+                "href": "https://api-engage-eu.sitecorecloud.io/v2.1/guests/c6cf690f-8384-4734-ab2d-6caa53b6308c"
+              },
+              {
+                "href": "https://api-engage-eu.sitecorecloud.io/v2.1/guests/1c5e13e7-8b97-4f12-9ab5-d30a6fa13d1a"
+              }
+            ],
+            "items": {
+              "$ref": "#/components/schemas/Link"
+            }
+          }
+        }
+      },
+      "GuestUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "guestType": {
+            "type": "string",
+            "description": "The level of identity obtained. The `\"traveller\"` value is only applicable to certain industries.",
+            "format": "lowercase",
+            "example": "visitor",
+            "enum": [
+              "visitor",
+              "customer",
+              "traveller"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the guest.\n\nExample values: \"Br\", \"Brigadier\", \"Capt\", \"Colonel\", \"Dame\", \"Dr\", \"Elder\", \"Fr\", \"General\", \"Hon\", \"Judge\", \"Lord\", \"Master\", \"Miss\", \"Mr\", \"Mrs\", \"Ms\", \"Mstr\", \"Prof\", \"Rabbi\", \"Rev\", \"Shaikha\", \"Sheikh\", \"Sir\", \"Sister\", \"Sr\"\n",
+            "format": "title case",
+            "example": "Mr"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "The guest's first name.",
+            "format": "title case",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "The guest's last name.",
+            "format": "title case recommended",
+            "example": "Doe"
+          },
+          "gender": {
+            "type": "string",
+            "description": "The guest's gender.\n\nExample values: \"male\", \"female\", \"other\"\n",
+            "format": "lowercase",
+            "example": "male"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "description": "The guest's date of birth. Validation: Date must be in the past.\n",
+            "format": "date-time",
+            "example": "1991-01-01T16:17:16.000Z"
+          },
+          "nationality": {
+            "type": "string",
+            "description": "The guest's nationality.\n\nExample values: \"Irish\", \"British\", \"Spanish\", \"French\"\n",
+            "format": "title case",
+            "example": "Irish"
+          },
+          "passportNumber": {
+            "type": "string",
+            "description": "The passport number of the guest.\n",
+            "format": "uppercase",
+            "example": "PZ4A9565"
+          },
+          "passportExpiry": {
+            "type": "string",
+            "description": "The expiry date of the guest's passport.\n",
+            "format": "date-time",
+            "example": "2025-01-01T00:00:00.000Z"
+          },
+          "emails": {
+            "type": "array",
+            "description": "All the email addresses of the guest.\n",
+            "example": [
+              "john.doe@gmail.com"
+            ],
+            "items": {
+              "type": "string",
+              "description": "All the email addresses of the guest.\n",
+              "example": [
+                "john.doe@gmail.com"
+              ]
+            }
+          },
+          "phoneNumbers": {
+            "type": "array",
+            "description": "The phone numbers of the guest.\n",
+            "example": [
+              "+353161123345",
+              "+353161123346"
+            ],
+            "items": {
+              "type": "string",
+              "description": "The phone numbers of the guest.\n",
+              "example": [
+                "+353161123345",
+                "+353161123346"
+              ]
+            }
+          },
+          "identifiers": {
+            "type": "array",
+            "description": "A list of identifiers for the guest.\n",
+            "items": {
+              "$ref": "#/components/schemas/Identifier"
+            }
+          },
+          "street": {
+            "type": "array",
+            "description": "The street address of the guest.\n",
+            "format": "title case strings",
+            "example": [
+              "Ashford House",
+              "Tara Street",
+              "Dublin 2"
+            ],
+            "items": {
+              "type": "string",
+              "description": "The street address of the guest.\n",
+              "format": "title case strings",
+              "example": [
+                "Ashford House",
+                "Tara Street",
+                "Dublin 2"
+              ]
+            }
+          },
+          "city": {
+            "type": "string",
+            "description": "The guest's city.\n\nExample values: \"Dublin\", \"London\", \"Madrid\", \"Paris\"\n",
+            "format": "title case",
+            "example": "Dublin"
+          },
+          "country": {
+            "type": "string",
+            "description": "The guest's country.\n\nExample values: \"IE\", \"GB\", \"ES\", \"FR\"",
+            "format": "2-letter ISO 3166-1 Alpha-2 country code",
+            "example": "IE"
+          },
+          "postCode": {
+            "type": "string",
+            "description": "The guest's postcode.\n",
+            "format": "uppercase",
+            "example": "D2"
+          },
+          "state": {
+            "type": "string",
+            "description": "The state (address) of the guest.\n",
+            "format": "title case",
+            "example": "Oregon"
+          }
+        }
+      },
+      "CollectionResourceGuestDataExtension": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "offset": {
+            "type": "object"
+          },
+          "nextOffset": {
+            "type": "object"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "prev": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "next": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "last": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuestDataExtension"
+            }
+          }
+        },
+        "description": "Guest's data extensions"
+      },
+      "Guest": {
+        "required": [
+          "guestType"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "deprecated": true
+          },
+          "emails": {
+            "maxItems": 1,
+            "minItems": 0,
+            "type": "array",
+            "description": "All the email addresses of the guest.\n",
+            "example": [
+              "john.doe@gmail.com"
+            ],
+            "items": {
+              "type": "string",
+              "description": "All the email addresses of the guest.\n",
+              "example": [
+                "john.doe@gmail.com"
+              ]
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "ref": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "The date and time when the resource was created in Sitecore CDP.\n",
+            "format": "date-time",
+            "example": "2024-01-01T16:17:16.000Z"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "description": "The date and time when the resource was updated in Sitecore CDP.\n",
+            "format": "date-time",
+            "example": "2024-01-01T16:17:16.000Z"
+          },
+          "firstSeen": {
+            "type": "string",
+            "description": "The first seen date for the guest.\n",
+            "format": "date-time",
+            "example": "2024-01-01T16:17:16.000Z"
+          },
+          "lastSeen": {
+            "type": "string",
+            "description": "The last time the guest interacted with your brand. If the guest is currently online and is interacting with your brand, this returns the date and timestamp of when the current session started.\n",
+            "format": "date-time",
+            "example": "2024-01-01T16:17:16.000Z"
+          },
+          "guestType": {
+            "type": "string",
+            "description": "The level of identity obtained. The `\"traveller\"` value is only applicable to certain industries.",
+            "format": "lowercase",
+            "example": "visitor",
+            "enum": [
+              "visitor",
+              "customer",
+              "traveller"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the guest.\n\nExample values: \"Br\", \"Brigadier\", \"Capt\", \"Colonel\", \"Dame\", \"Dr\", \"Elder\", \"Fr\", \"General\", \"Hon\", \"Judge\", \"Lord\", \"Master\", \"Miss\", \"Mr\", \"Mrs\", \"Ms\", \"Mstr\", \"Prof\", \"Rabbi\", \"Rev\", \"Shaikha\", \"Sheikh\", \"Sir\", \"Sister\", \"Sr\"\n",
+            "format": "title case",
+            "example": "Mr"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "The guest's first name.",
+            "format": "title case",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "The guest's last name.",
+            "format": "title case recommended",
+            "example": "Doe"
+          },
+          "gender": {
+            "type": "string",
+            "description": "The guest's gender.\n\nExample values: \"male\", \"female\", \"other\"\n",
+            "format": "lowercase",
+            "example": "male"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "description": "The guest's date of birth. Validation: Date must be in the past.\n",
+            "format": "date-time",
+            "example": "1991-01-01T16:17:16.000Z"
+          },
+          "nationality": {
+            "type": "string",
+            "description": "The guest's nationality.\n\nExample values: \"Irish\", \"British\", \"Spanish\", \"French\"\n",
+            "format": "title case",
+            "example": "Irish"
+          },
+          "passportNumber": {
+            "type": "string",
+            "description": "The passport number of the guest.\n",
+            "format": "uppercase",
+            "example": "PZ4A9565"
+          },
+          "passportExpiry": {
+            "type": "string",
+            "description": "The expiry date of the guest's passport.\n",
+            "format": "date-time",
+            "example": "2025-01-01T00:00:00.000Z"
+          },
+          "language": {
+            "type": "string",
+            "description": "The preferred language of the guest.\n\nExample values: \"EN\", \"FR\", \"DE\"\n",
+            "format": "2-letter ISO 639 language code",
+            "example": "EN"
+          },
+          "phoneNumbers": {
+            "type": "array",
+            "description": "The phone numbers of the guest.\n",
+            "example": [
+              "+353161123345",
+              "+353161123346"
+            ],
+            "items": {
+              "type": "string",
+              "description": "The phone numbers of the guest.\n",
+              "example": [
+                "+353161123345",
+                "+353161123346"
+              ]
+            }
+          },
+          "street": {
+            "type": "array",
+            "description": "The street address of the guest.\n",
+            "format": "title case strings",
+            "example": [
+              "Ashford House",
+              "Tara Street",
+              "Dublin 2"
+            ],
+            "items": {
+              "type": "string",
+              "description": "The street address of the guest.\n",
+              "format": "title case strings",
+              "example": [
+                "Ashford House",
+                "Tara Street",
+                "Dublin 2"
+              ]
+            }
+          },
+          "city": {
+            "type": "string",
+            "description": "The guest's city.\n\nExample values: \"Dublin\", \"London\", \"Madrid\", \"Paris\"\n",
+            "format": "title case",
+            "example": "Dublin"
+          },
+          "country": {
+            "type": "string",
+            "description": "The guest's country.\n\nExample values: \"IE\", \"GB\", \"ES\", \"FR\"",
+            "format": "2-letter ISO 3166-1 Alpha-2 country code",
+            "example": "IE"
+          },
+          "postCode": {
+            "type": "string",
+            "description": "The guest's postcode.\n",
+            "format": "uppercase",
+            "example": "D2"
+          },
+          "state": {
+            "type": "string",
+            "description": "The state (address) of the guest.\n",
+            "format": "title case",
+            "example": "Oregon"
+          },
+          "subscriptions": {
+            "maxItems": 0,
+            "minItems": 0,
+            "type": "array",
+            "deprecated": true,
+            "items": {
+              "$ref": "#/components/schemas/GuestSubscription"
+            }
+          },
+          "identifiers": {
+            "type": "array",
+            "description": "A list of identifiers for the guest.\n",
+            "items": {
+              "$ref": "#/components/schemas/Identifier"
+            }
+          },
+          "dataExtensions": {
+            "$ref": "#/components/schemas/CollectionResourceGuestDataExtension"
+          },
+          "identityStatus": {
+            "type": "string",
+            "deprecated": true
+          },
+          "zipCode": {
+            "type": "string",
+            "deprecated": true
+          }
+        },
+        "description": "The guest object."
+      },
+      "GuestDataExtension": {
+        "required": [
+          "key",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "ref": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string",
+            "description": "You must set this to `default`.",
+            "example": "default"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "The date and time when the resource was created in Sitecore CDP.",
+            "format": "date-time",
+            "example": "2024-01-01T16:17:16.000Z"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "description": "The date and time when the resource was last updated in Sitecore CDP.",
+            "format": "date-time",
+            "example": "2024-01-01T16:17:16.000Z"
+          }
+        },
+        "description": "The data extension object."
+      },
+      "GuestSubscription": {
+        "required": [
+          "channel",
+          "name",
+          "pointOfSale",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The subscription name.",
+            "example": "newsletter_subscription"
+          },
+          "channel": {
+            "type": "string",
+            "description": "The channel the guest used to subscribe.",
+            "example": "WEB"
+          },
+          "pointOfSale": {
+            "type": "string",
+            "description": "The point of sale the guest used to subscribe.",
+            "example": "myRetailsite/ireland"
+          },
+          "status": {
+            "type": "string",
+            "description": "The subscription status.",
+            "example": "SUBSCRIBED",
+            "enum": [
+              "UNKNOWN",
+              "PENDING",
+              "SUBSCRIBED",
+              "UNSUBSCRIBED"
+            ]
+          },
+          "effectiveDate": {
+            "type": "string",
+            "description": "The date the subscription is effective from.",
+            "format": "date-time",
+            "example": "2024-01-01T16:17:16.000Z"
+          }
+        },
+        "deprecated": true
+      },
+      "GuestPartialUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "phoneNumbers": {
+            "type": "array",
+            "description": "The phone numbers of the guest.\n",
+            "example": [
+              353161123345,
+              353161123346
+            ],
+            "items": {
+              "type": "string",
+              "description": "The phone numbers of the guest.\n",
+              "example": [
+                "+353161123345",
+                "+353161123346"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "x-logo": {
+    "altText": "Guest REST API",
+    "url": "https://content-search-api-doc.rfksrv.com/logo.png"
+  }
+}
